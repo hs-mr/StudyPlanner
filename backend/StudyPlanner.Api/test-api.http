@@ -1,0 +1,118 @@
+@baseUrl = http://localhost:2014
+
+### USERS ###
+
+# Alle Users abrufen
+GET {{baseUrl}}/api/users
+
+###
+
+# Einen User abrufen
+GET {{baseUrl}}/api/users/1
+
+###
+
+# Einen neuen User erstellen
+POST {{baseUrl}}/api/users
+Content-Type: application/json
+
+{
+  "name": "Max Mustermann",
+  "password": "test123",
+  "status": "Aktiv"
+}
+
+###
+
+# User aktualisieren
+PUT {{baseUrl}}/api/users/1
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "Max Mustermann Updated",
+  "password": "newPassword",
+  "status": "Inaktiv"
+}
+
+###
+
+# User löschen
+DELETE {{baseUrl}}/api/users/1
+
+###
+
+### NOTIFICATIONS ###
+
+# Alle Notifications abrufen
+GET {{baseUrl}}/api/notifications
+
+###
+
+# Notifications eines Users abrufen
+GET {{baseUrl}}/api/notifications/user/1
+
+###
+
+# Neue Notification erstellen
+POST {{baseUrl}}/api/notifications
+Content-Type: application/json
+
+{
+  "notificationMessage": "Willkommen im StudyPlanner!",
+  "userId": 1
+}
+
+###
+
+# Notification löschen
+DELETE {{baseUrl}}/api/notifications/1
+
+###
+
+### PLANS ###
+
+# Alle Plans abrufen
+GET {{baseUrl}}/api/plans
+
+###
+
+# Plans eines Users abrufen
+GET {{baseUrl}}/api/plans/user/1
+
+###
+
+# Einen Plan abrufen
+GET {{baseUrl}}/api/plans/1
+
+###
+
+# Neuen Plan erstellen
+POST {{baseUrl}}/api/plans
+Content-Type: application/json
+
+{
+  "planTheme": "Mathematik lernen",
+  "planStatus": "In Arbeit",
+  "notes": "Kapitel 1-3 durcharbeiten",
+  "userId": 1
+}
+
+###
+
+# Plan aktualisieren
+PUT {{baseUrl}}/api/plans/1
+Content-Type: application/json
+
+{
+  "id": 1,
+  "planTheme": "Mathematik lernen - Update",
+  "planStatus": "Abgeschlossen",
+  "notes": "Alle Kapitel fertig",
+  "userId": 1
+}
+
+###
+
+# Plan löschen
+DELETE {{baseUrl}}/api/plans/1
