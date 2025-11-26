@@ -1,0 +1,11 @@
+{
+  "name": "studyplanner-frontend",
+  "version": "1.0.0",
+  "description": "Study Planner Frontend",
+  "scripts": {
+    "start": "npx http-server -p 8080 -o"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

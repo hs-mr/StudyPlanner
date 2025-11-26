@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Planner</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Study Planner</h1>
+        
+        <!-- Neuen User erstellen -->
+        <div class="form-group">
+            <h2>Neuen Benutzer erstellen</h2>
+            <input type="text" id="userName" placeholder="Benutzername">
+            <input type="password" id="userPassword" placeholder="Passwort">
+            <button onclick="createUser()">Benutzer erstellen</button>
+        </div>
+        
+        <!-- User Liste -->
+        <div class="user-list">
+            <h2>Alle Benutzer</h2>
+            <button onclick="loadUsers()">Benutzer laden</button>
+            <div id="usersList"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
