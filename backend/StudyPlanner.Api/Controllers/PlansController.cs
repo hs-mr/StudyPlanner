@@ -37,22 +37,6 @@ public class PlansController : ControllerBase
         return plans;
     }
 
-    // GET: api/plans/5
-    [HttpGet("{id}")]
-    public async Task<ActionResult<Plan>> GetPlan(int id)
-    {
-        var plan = await _context.Plans
-            .Include(p => p.User)
-            .FirstOrDefaultAsync(p => p.Id == id);
-
-        if (plan == null)
-        {
-            return NotFound();
-        }
-
-        return plan;
-    }
-
     // POST: api/plans
     [HttpPost]
     public async Task<ActionResult<Plan>> CreatePlan(Plan plan)
@@ -66,7 +50,7 @@ public class PlansController : ControllerBase
         _context.Plans.Add(plan);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetPlan), new { id = plan.Id }, plan);
+        return CreatedAtAction(nameof(GetPlans), new { id = plan.Id }, plan);
     }
 
     // PUT: api/plans/5
