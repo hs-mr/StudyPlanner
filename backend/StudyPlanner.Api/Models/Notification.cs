@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace StudyPlanner.Api.Models;
 
 public class Notification
@@ -9,5 +11,6 @@ public class Notification
     public int UserId { get; set; }
 
     // Navigation Property
-    public User User { get; set; } = null!;
+    [JsonIgnore]
+    public User? User { get; set; }
 }
