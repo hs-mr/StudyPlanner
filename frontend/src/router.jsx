@@ -8,6 +8,7 @@ import Erinnerungen from "./pages/Erinnerungen";
 import Einstellungen from "./pages/Einstellungen";
 import Login from "./pages/Login";
 import Registrieren from "./pages/Registrieren";
+import Profil from "./pages/Profil";
 
 export default function AppRouter() {
     return (
@@ -63,6 +64,15 @@ export default function AppRouter() {
                     element={
                         <MainLayout>
                             <Einstellungen />
+                        </MainLayout>
+                    }
+                />
+
+                <Route
+                    path="/profil"
+                    element={
+                        <MainLayout>
+                            <Profil />
                         </MainLayout>
                     }
                 />
