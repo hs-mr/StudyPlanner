@@ -4,7 +4,8 @@ import {
     CalendarDaysIcon,
     BellIcon,
     Cog6ToothIcon,
-    ArrowRightOnRectangleIcon
+    ArrowRightOnRectangleIcon,
+    UserPlusIcon
 } from "@heroicons/react/24/outline";
 import "../styles/sidebar.css";
 
@@ -14,7 +15,8 @@ export default function Sidebar() {
         { name: "Planer", to: "/planer", icon: <CalendarDaysIcon /> },
         { name: "Erinnerungen", to: "/erinnerungen", icon: <BellIcon /> },
         { name: "Einstellungen", to: "/einstellungen", icon: <Cog6ToothIcon /> },
-        { name: "Logout", to: "/login", icon: <ArrowRightOnRectangleIcon /> },
+        { name: "Registrieren", to: "/register", icon: <UserPlusIcon /> },
+        { name: "Login/Logout", to: "/login", icon: <ArrowRightOnRectangleIcon /> },
     ];
 
     return (
