@@ -15,7 +15,7 @@ export default function Sidebar() {
         { name: "Planer", to: "/planer", icon: <CalendarDaysIcon /> },
         { name: "Erinnerungen", to: "/erinnerungen", icon: <BellIcon /> },
         { name: "Einstellungen", to: "/einstellungen", icon: <Cog6ToothIcon /> },
-        { name: "Registrieren", to: "/register", icon: <UserPlusIcon /> },
+        { name: "Registrieren", to: "/registrieren", icon: <UserPlusIcon /> },
         { name: "Login/Logout", to: "/login", icon: <ArrowRightOnRectangleIcon /> },
     ];
 

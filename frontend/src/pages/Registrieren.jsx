@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { UserIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 
-export default function Login() {
+export default function Registrieren() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -22,45 +22,30 @@ export default function Login() {
         }
 
         try {
-            // Alle User abrufen
-            const response = await fetch("http://localhost:5024/api/users");
-            if (!response.ok) {
-                throw new Error("Fehler beim Abrufen der Benutzerdaten");
-            }
-
-            const users = await response.json();
-            
-            // User mit passendem Namen und Passwort finden
-            const user = users.find(u => u.name === username && u.password === password);
-
-            if (!user) {
-                setError("Benutzername oder Passwort falsch");
-                setLoading(false);
-                return;
-            }
-
-            // User-Status auf true setzen
-            const updateResponse = await fetch(`http://localhost:5024/api/users/${user.id}`, {
-                method: "PUT",
+            const response = await fetch("http://localhost:5024/api/users", {
+                method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    ...user,
-                    status: true
+                    name: username,
+                    password: password,
+                    status: false
                 }),
             });
 
-            if (!updateResponse.ok) {
-                throw new Error("Fehler beim Anmelden");
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Registrierung fehlgeschlagen");
             }
 
-            console.log("User erfolgreich angemeldet:", user);
+            const data = await response.json();
+            console.log("User erfolgreich erstellt:", data);
             
-            // Nach erfolgreichem Login zum Dashboard weiterleiten
-            navigate("/");
+            // Nach erfolgreicher Registrierung zum Login weiterleiten
+            navigate("/login");
         } catch (err) {
-            console.error("Fehler beim Login:", err);
+            console.error("Fehler bei der Registrierung:", err);
             setError(err.message || "Ein Fehler ist aufgetreten. Bitte versuche es erneut.");
         } finally {
             setLoading(false);
@@ -84,13 +69,13 @@ export default function Login() {
                     textAlign: "center",
                     marginBottom: "10px",
                     fontSize: "28px"
-                }}>Willkommen zurück</h1>
+                }}>Konto erstellen</h1>
                 <p style={{
                     textAlign: "center",
                     opacity: "0.6",
                     marginBottom: "30px",
                     fontSize: "15px"
-                }}>Melde dich an, um fortzufahren</p>
+                }}>Erstelle ein neues Konto für deinen Study Planner</p>
 
                 {error && (
                     <div style={{
@@ -125,7 +110,7 @@ export default function Login() {
                             <UserIcon style={{ width: "20px", opacity: "0.5", marginRight: "10px" }} />
                             <input
                                 type="text"
-                                placeholder="Dein Benutzername"
+                                placeholder="Wähle einen Benutzernamen"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 disabled={loading}
@@ -158,7 +143,7 @@ export default function Login() {
                             <LockClosedIcon style={{ width: "20px", opacity: "0.5", marginRight: "10px" }} />
                             <input
                                 type="password"
-                                placeholder="Dein Passwort"
+                                placeholder="Wähle ein sicheres Passwort"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 disabled={loading}
@@ -187,7 +172,7 @@ export default function Login() {
                             cursor: loading ? "not-allowed" : "pointer"
                         }}
                     >
-                        {loading ? "Wird angemeldet..." : "Anmelden"}
+                        {loading ? "Wird erstellt..." : "Konto erstellen"}
                     </button>
                 </form>
 
@@ -197,9 +182,9 @@ export default function Login() {
                     paddingTop: "25px",
                     borderTop: "1px solid rgba(0,0,0,0.08)"
                 }}>
-                    <span style={{ opacity: "0.6", fontSize: "14px" }}>Noch kein Konto? </span>
+                    <span style={{ opacity: "0.6", fontSize: "14px" }}>Bereits ein Konto? </span>
                     <Link
-                        to="/registrieren"
+                        to="/login"
                         style={{
                             color: "#007aff",
                             textDecoration: "none",
@@ -207,7 +192,7 @@ export default function Login() {
                             fontSize: "14px"
                         }}
                     >
-                        Jetzt registrieren
+                        Jetzt anmelden
                     </Link>
                 </div>
             </div>

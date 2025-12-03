@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { TrashIcon, PlusIcon } from "@heroicons/react/24/outline";
 
 const STATUS_OPTIONS = [
@@ -13,7 +13,6 @@ function createRow() {
         thema: "",
         status: "",
         notizen: "",
-        category: "",
     };
 }
 
@@ -21,11 +20,6 @@ const STORAGE_KEY = "studyplanner_planer_rows";
 
 export default function Planer() {
     const [rows, setRows] = useState([createRow()]);
-
-    const [search, setSearch] = useState("");
-    const [statusFilter, setStatusFilter] = useState("");
-    const [categoryFilter, setCategoryFilter] = useState("");
-    const [sortBy, setSortBy] = useState("default");
 
     // 🔄 LocalStorage laden
     useEffect(() => {
@@ -64,7 +58,6 @@ export default function Planer() {
     }
 
     function deleteRow(id) {
-        // kleine Animation: erst Klasse "deleting", dann entfernen
         setRows((prev) =>
             prev.map((row) =>
                 row.id === id ? { ...row, _deleting: true } : row
@@ -75,46 +68,6 @@ export default function Planer() {
             setRows((prev) => prev.filter((row) => row.id !== id));
         }, 200);
     }
-
-    // Kategorien-Liste aus existierenden Zeilen
-    const availableCategories = useMemo(() => {
-        const set = new Set(
-            rows
-                .map((r) => r.category?.trim())
-                .filter((c) => c && c.length > 0)
-        );
-        return Array.from(set);
-    }, [rows]);
-
-    // Filter + Sortierung anwenden
-    const visibleRows = useMemo(() => {
-        let list = [...rows];
-
-        if (search.trim()) {
-            const s = search.toLowerCase();
-            list = list.filter(
-                (r) =>
-                    r.thema.toLowerCase().includes(s) ||
-                    r.notizen.toLowerCase().includes(s)
-            );
-        }
-
-        if (statusFilter) {
-            list = list.filter((r) => r.status === statusFilter);
-        }
-
-        if (categoryFilter) {
-            list = list.filter((r) => r.category === categoryFilter);
-        }
-
-        if (sortBy === "thema") {
-            list.sort((a, b) => a.thema.localeCompare(b.thema));
-        } else if (sortBy === "status") {
-            list.sort((a, b) => (a.status || "").localeCompare(b.status || ""));
-        }
-
-        return list;
-    }, [rows, search, statusFilter, categoryFilter, sortBy]);
 
     function statusClass(status) {
         if (status === "offen") return "status-pill status-offen";
@@ -136,51 +89,8 @@ export default function Planer() {
                     padding: "30px",
                 }}
             >
-                {/* Filter & Sort */}
-                <div className="planner-filter-bar">
-                    <input
-                        className="filter-input"
-                        placeholder="Suche nach Thema oder Notizen…"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-
-                    <select
-                        className="filter-select"
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                    >
-                        <option value="">Alle Status</option>
-                        {STATUS_OPTIONS.filter((s) => s.value).map((s) => (
-                            <option key={s.value} value={s.value}>
-                                {s.label}
-                            </option>
-                        ))}
-                    </select>
-
-                    <select
-                        className="filter-select"
-                        value={categoryFilter}
-                        onChange={(e) => setCategoryFilter(e.target.value)}
-                    >
-                        <option value="">Alle Kategorien</option>
-                        {availableCategories.map((cat) => (
-                            <option key={cat} value={cat}>
-                                {cat}
-                            </option>
-                        ))}
-                    </select>
-
-                    <select
-                        className="filter-select"
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value)}
-                    >
-                        <option value="default">Sortierung: Original</option>
-                        <option value="thema">Thema A–Z</option>
-                        <option value="status">Status</option>
-                    </select>
-
+                {/* Button */}
+                <div style={{ marginBottom: "20px" }}>
                     <button className="btn-primary" onClick={addRow}>
                         <PlusIcon style={{ width: "18px" }} />
                         Neue Zeile
@@ -192,7 +102,7 @@ export default function Planer() {
                     <thead>
                     <tr>
                         <th>
-                            <div className="table-header-shadow">Thema &amp; Kategorie</div>
+                            <div className="table-header-shadow">Thema</div>
                         </th>
                         <th>
                             <div className="table-header-shadow">Status</div>
@@ -207,33 +117,23 @@ export default function Planer() {
                     </thead>
 
                     <tbody>
-                    {visibleRows.map((row) => (
+                    {rows.map((row) => (
                         <tr
                             key={row.id}
                             className={`fade planner-row ${
                                 row._deleting ? "row-deleting" : "row-enter"
                             }`}
                         >
-                            {/* Thema + Kategorie */}
+                            {/* Thema */}
                             <td>
-                                <div className="thema-cell">
-                                    <input
-                                        className="table-input"
-                                        placeholder="Thema"
-                                        value={row.thema}
-                                        onChange={(e) =>
-                                            updateRow(row.id, "thema", e.target.value)
-                                        }
-                                    />
-                                    <input
-                                        className="category-input"
-                                        placeholder="Kategorie (optional)"
-                                        value={row.category}
-                                        onChange={(e) =>
-                                            updateRow(row.id, "category", e.target.value)
-                                        }
-                                    />
-                                </div>
+                                <input
+                                    className="table-input"
+                                    placeholder="Thema"
+                                    value={row.thema}
+                                    onChange={(e) =>
+                                        updateRow(row.id, "thema", e.target.value)
+                                    }
+                                />
                             </td>
 
                             {/* Status als farbige Tags + Dropdown */}
@@ -285,10 +185,10 @@ export default function Planer() {
                         </tr>
                     ))}
 
-                    {visibleRows.length === 0 && (
+                    {rows.length === 0 && (
                         <tr>
                             <td colSpan={4} style={{ paddingTop: "20px", opacity: 0.6 }}>
-                                Keine Einträge für diese Filter.
+                                Keine Einträge vorhanden.
                             </td>
                         </tr>
                     )}
