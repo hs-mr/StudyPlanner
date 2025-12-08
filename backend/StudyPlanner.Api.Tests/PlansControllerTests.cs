@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using StudyPlanner.Api.Controllers;
 using StudyPlanner.Api.Data;
 using StudyPlanner.Api.Models;
+using StudyPlanner.Api.DTOs;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -44,7 +45,9 @@ public class PlansControllerTests
 
             // Assert
             Assert.NotNull(result);
-            var plans = result.Value?.ToList();
+            Assert.IsType<OkObjectResult>(result.Result);
+            var okResult = result.Result as OkObjectResult;
+            var plans = (okResult!.Value as IEnumerable<PlanResponseDto>)?.ToList();
             Assert.NotNull(plans);
             Assert.Equal(2, plans.Count);
             Assert.Equal("Study Mathematics", plans[0].PlanTheme);
@@ -77,7 +80,9 @@ public class PlansControllerTests
 
             // Assert
             Assert.NotNull(result);
-            var plans = result.Value?.ToList();
+            Assert.IsType<OkObjectResult>(result.Result);
+            var okResult = result.Result as OkObjectResult;
+            var plans = (okResult!.Value as IEnumerable<PlanResponseDto>)?.ToList();
             Assert.NotNull(plans);
             Assert.Equal(2, plans.Count);
             Assert.All(plans, p => Assert.Equal(userId, p.UserId));
@@ -100,7 +105,9 @@ public class PlansControllerTests
 
             // Assert
             Assert.NotNull(result);
-            var plans = result.Value?.ToList();
+            Assert.IsType<OkObjectResult>(result.Result);
+            var okResult = result.Result as OkObjectResult;
+            var plans = (okResult!.Value as IEnumerable<PlanResponseDto>)?.ToList();
             Assert.NotNull(plans);
             Assert.Empty(plans);
         }
@@ -117,7 +124,7 @@ public class PlansControllerTests
             context.Users.Add(user);
             await context.SaveChangesAsync();
 
-            var newPlan = new Plan 
+            var newPlanDto = new PlanCreateDto
             { 
                 PlanTheme = "New Study Plan", 
                 PlanStatus = false, 
@@ -128,7 +135,7 @@ public class PlansControllerTests
             var controller = new PlansController(context);
 
             // Act
-            var result = await controller.CreatePlan(newPlan);
+            var result = await controller.CreatePlan(newPlanDto);
 
             // Assert
             Assert.NotNull(result);
@@ -146,7 +153,7 @@ public class PlansControllerTests
         // Arrange
         using (var context = CreateDbContext())
         {
-            var newPlan = new Plan 
+            var newPlanDto = new PlanCreateDto
             { 
                 PlanTheme = "Plan for nonexistent user", 
                 PlanStatus = false, 
@@ -156,7 +163,7 @@ public class PlansControllerTests
             var controller = new PlansController(context);
 
             // Act
-            var result = await controller.CreatePlan(newPlan);
+            var result = await controller.CreatePlan(newPlanDto);
 
             // Assert
             Assert.NotNull(result);
@@ -184,22 +191,17 @@ public class PlansControllerTests
             var planId = plan.Id;
             var userId = user.Id;
             
-            // Detach the original plan to avoid tracking conflicts
-            context.Entry(plan).State = EntityState.Detached;
-            
-            var updatedPlan = new Plan 
+            var updatedPlanDto = new PlanUpdateDto
             { 
-                Id = planId, 
                 PlanTheme = "Updated Plan Theme", 
                 PlanStatus = true, 
-                UserId = userId,
                 Notes = "Updated notes"
             };
 
             var controller = new PlansController(context);
 
             // Act
-            var result = await controller.UpdatePlan(planId, updatedPlan);
+            var result = await controller.UpdatePlan(planId, updatedPlanDto);
 
             // Assert
             Assert.IsType<NoContentResult>(result);
@@ -212,22 +214,22 @@ public class PlansControllerTests
         }
     }
 
-    // Test: UpdatePlan - Liefert BadRequest wenn IDs nicht übereinstimmen
+    // Test: UpdatePlan - Liefert NotFound wenn Plan nicht existiert
     [Fact]
-    public async Task UpdatePlan_WithMismatchedIds_ReturnsBadRequest()
+    public async Task UpdatePlan_WithNonExistentPlan_ReturnsNotFound()
     {
         // Arrange
         using (var context = CreateDbContext())
         {
-            var planId = 1;
-            var plan = new Plan { Id = 2, PlanTheme = "Test Plan", PlanStatus = false, UserId = 1 };
+            var planId = 999;
+            var planDto = new PlanUpdateDto { PlanTheme = "Test Plan", PlanStatus = false };
             var controller = new PlansController(context);
 
             // Act
-            var result = await controller.UpdatePlan(planId, plan);
+            var result = await controller.UpdatePlan(planId, planDto);
 
             // Assert
-            Assert.IsType<BadRequestResult>(result);
+            Assert.IsType<NotFoundResult>(result);
         }
     }
 
@@ -290,7 +292,7 @@ public class PlansControllerTests
             context.Users.Add(user);
             await context.SaveChangesAsync();
 
-            var newPlan = new Plan 
+            var newPlanDto = new PlanCreateDto
             { 
                 PlanTheme = theme, 
                 PlanStatus = status, 
@@ -300,12 +302,12 @@ public class PlansControllerTests
             var controller = new PlansController(context);
 
             // Act
-            var result = await controller.CreatePlan(newPlan);
+            var result = await controller.CreatePlan(newPlanDto);
 
             // Assert
             var createdResult = result.Result as CreatedAtActionResult;
             Assert.NotNull(createdResult);
-            var createdPlan = createdResult.Value as Plan;
+            var createdPlan = createdResult.Value as PlanResponseDto;
             Assert.NotNull(createdPlan);
             Assert.Equal(theme, createdPlan.PlanTheme);
             Assert.Equal(status, createdPlan.PlanStatus);
@@ -342,7 +344,9 @@ public class PlansControllerTests
             var result = await controller.GetPlans();
 
             // Assert
-            var plans = result.Value?.ToList();
+            Assert.IsType<OkObjectResult>(result.Result);
+            var okResult = result.Result as OkObjectResult;
+            var plans = (okResult!.Value as IEnumerable<PlanResponseDto>)?.ToList();
             Assert.NotNull(plans);
             Assert.Equal(5, plans.Count);
         }

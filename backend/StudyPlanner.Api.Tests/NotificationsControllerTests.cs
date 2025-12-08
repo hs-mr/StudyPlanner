@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using StudyPlanner.Api.Controllers;
 using StudyPlanner.Api.Data;
 using StudyPlanner.Api.Models;
+using StudyPlanner.Api.DTOs;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -45,7 +46,9 @@ public class NotificationsControllerTests
 
             // Assert
             Assert.NotNull(result);
-            var notifications = result.Value?.ToList();
+            Assert.IsType<OkObjectResult>(result.Result);
+            var okResult = result.Result as OkObjectResult;
+            var notifications = (okResult!.Value as IEnumerable<NotificationResponseDto>)?.ToList();
             Assert.NotNull(notifications);
             Assert.Equal(3, notifications.Count);
             Assert.Equal("Study reminder: Math", notifications[0].NotificationMessage);
@@ -77,7 +80,9 @@ public class NotificationsControllerTests
 
             // Assert
             Assert.NotNull(result);
-            var notifications = result.Value?.ToList();
+            Assert.IsType<OkObjectResult>(result.Result);
+            var okResult = result.Result as OkObjectResult;
+            var notifications = (okResult!.Value as IEnumerable<NotificationResponseDto>)?.ToList();
             Assert.NotNull(notifications);
             Assert.Equal(3, notifications.Count);
             Assert.All(notifications, n => Assert.Equal(userId, n.UserId));
@@ -98,7 +103,9 @@ public class NotificationsControllerTests
 
             // Assert
             Assert.NotNull(result);
-            var notifications = result.Value?.ToList();
+            Assert.IsType<OkObjectResult>(result.Result);
+            var okResult = result.Result as OkObjectResult;
+            var notifications = (okResult!.Value as IEnumerable<NotificationResponseDto>)?.ToList();
             Assert.NotNull(notifications);
             Assert.Empty(notifications);
         }
@@ -115,7 +122,7 @@ public class NotificationsControllerTests
             context.Users.Add(user);
             await context.SaveChangesAsync();
 
-            var newNotification = new Notification 
+            var newNotificationDto = new NotificationCreateDto
             { 
                 NotificationMessage = "New reminder", 
                 UserId = user.Id
@@ -124,7 +131,7 @@ public class NotificationsControllerTests
             var controller = new NotificationsController(context);
 
             // Act
-            var result = await controller.CreateNotification(newNotification);
+            var result = await controller.CreateNotification(newNotificationDto);
 
             // Assert
             Assert.NotNull(result);
@@ -142,7 +149,7 @@ public class NotificationsControllerTests
         // Arrange
         using (var context = CreateDbContext())
         {
-            var newNotification = new Notification 
+            var newNotificationDto = new NotificationCreateDto
             { 
                 NotificationMessage = "Notification for nonexistent user", 
                 UserId = 999
@@ -151,7 +158,7 @@ public class NotificationsControllerTests
             var controller = new NotificationsController(context);
 
             // Act
-            var result = await controller.CreateNotification(newNotification);
+            var result = await controller.CreateNotification(newNotificationDto);
 
             // Assert
             Assert.NotNull(result);
@@ -222,7 +229,7 @@ public class NotificationsControllerTests
             context.Users.Add(user);
             await context.SaveChangesAsync();
 
-            var newNotification = new Notification 
+            var newNotificationDto = new NotificationCreateDto
             { 
                 NotificationMessage = message, 
                 UserId = user.Id
@@ -231,12 +238,12 @@ public class NotificationsControllerTests
             var controller = new NotificationsController(context);
 
             // Act
-            var result = await controller.CreateNotification(newNotification);
+            var result = await controller.CreateNotification(newNotificationDto);
 
             // Assert
             var createdResult = result.Result as CreatedAtActionResult;
             Assert.NotNull(createdResult);
-            var createdNotification = createdResult.Value as Notification;
+            var createdNotification = createdResult.Value as NotificationResponseDto;
             Assert.NotNull(createdNotification);
             Assert.Equal(message, createdNotification.NotificationMessage);
             Assert.Equal(user.Id, createdNotification.UserId);
@@ -269,7 +276,9 @@ public class NotificationsControllerTests
             var result = await controller.GetNotificationsByUser(userId1);
 
             // Assert
-            var notifications = result.Value?.ToList();
+            Assert.IsType<OkObjectResult>(result.Result);
+            var okResult = result.Result as OkObjectResult;
+            var notifications = (okResult!.Value as IEnumerable<NotificationResponseDto>)?.ToList();
             Assert.NotNull(notifications);
             Assert.Equal(2, notifications.Count);
             Assert.All(notifications, n => Assert.Equal(userId1, n.UserId));
@@ -306,7 +315,9 @@ public class NotificationsControllerTests
             var result = await controller.GetNotifications();
 
             // Assert
-            var notifications = result.Value?.ToList();
+            Assert.IsType<OkObjectResult>(result.Result);
+            var okResult = result.Result as OkObjectResult;
+            var notifications = (okResult!.Value as IEnumerable<NotificationResponseDto>)?.ToList();
             Assert.NotNull(notifications);
             Assert.Equal(7, notifications.Count);
         }

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using StudyPlanner.Api.Controllers;
 using StudyPlanner.Api.Data;
 using StudyPlanner.Api.Models;
+using StudyPlanner.Api.DTOs;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -44,7 +45,9 @@ public class UsersControllerTests
 
             // Assert
             Assert.NotNull(result);
-            var users = result.Value?.ToList();
+            Assert.IsType<OkObjectResult>(result.Result);
+            var okResult = result.Result as OkObjectResult;
+            var users = (okResult!.Value as IEnumerable<UserResponseDto>)?.ToList();
             Assert.NotNull(users);
             Assert.Equal(2, users.Count);
             Assert.Equal("User1", users[0].Name);
@@ -104,18 +107,18 @@ public class UsersControllerTests
         }
     }
 
-    // Test: CreateUser - Erstellt neuen Benutzer erfolgreich
+    // Test: CreateUser - Legt neuen Benutzer an und liefert CreatedAtActionResult
     [Fact]
-    public async Task CreateUser_WithValidUser_ReturnsCreatedAtAction()
+    public async Task CreateUser_WithValidUser_ReturnsCreatedAtActionResult()
     {
         // Arrange
         using (var context = CreateDbContext())
         {
-            var newUser = new User { Name = "NewUser", Password = "newPassword123", Status = false };
+            var newUserDto = new UserCreateDto { Name = "NewUser", Password = "newPassword123" };
             var controller = new UsersController(context);
 
             // Act
-            var result = await controller.CreateUser(newUser);
+            var result = await controller.CreateUser(newUserDto);
 
             // Assert
             Assert.NotNull(result);
@@ -123,7 +126,10 @@ public class UsersControllerTests
             var createdResult = result.Result as CreatedAtActionResult;
             Assert.NotNull(createdResult);
             Assert.Equal(nameof(controller.GetUser), createdResult.ActionName);
-            Assert.True(newUser.Id > 0);
+            var createdUser = createdResult.Value as UserResponseDto;
+            Assert.NotNull(createdUser);
+            Assert.True(createdUser.Id > 0);
+            Assert.Equal("NewUser", createdUser.Name);
         }
     }
 
@@ -140,15 +146,12 @@ public class UsersControllerTests
             
             var userId = user.Id;
             
-            // Detach the original user to avoid tracking conflicts
-            context.Entry(user).State = EntityState.Detached;
-            
-            var updatedUser = new User { Id = userId, Name = "UpdatedUser", Password = "updatedPassword123", Status = false };
+            var updatedUserDto = new UserUpdateDto { Name = "UpdatedUser", Status = false };
 
             var controller = new UsersController(context);
 
             // Act
-            var result = await controller.UpdateUser(userId, updatedUser);
+            var result = await controller.UpdateUser(userId, updatedUserDto);
 
             // Assert
             Assert.IsType<NoContentResult>(result);
@@ -161,22 +164,22 @@ public class UsersControllerTests
         }
     }
 
-    // Test: UpdateUser - Liefert BadRequest wenn IDs nicht übereinstimmen
+    // Test: UpdateUser - Liefert NotFound wenn User nicht existiert
     [Fact]
-    public async Task UpdateUser_WithMismatchedIds_ReturnsBadRequest()
+    public async Task UpdateUser_WithNonExistentUser_ReturnsNotFound()
     {
         // Arrange
         using (var context = CreateDbContext())
         {
-            var userId = 1;
-            var user = new User { Id = 2, Name = "TestUser", Password = "password123", Status = true };
+            var userId = 999; // Nicht existierende ID
+            var userDto = new UserUpdateDto { Name = "TestUser", Status = true };
             var controller = new UsersController(context);
 
             // Act
-            var result = await controller.UpdateUser(userId, user);
+            var result = await controller.UpdateUser(userId, userDto);
 
             // Assert
-            Assert.IsType<BadRequestResult>(result);
+            Assert.IsType<NotFoundResult>(result);
         }
     }
 
@@ -225,28 +228,28 @@ public class UsersControllerTests
 
     // Test: CreateUser mit verschiedenen Benutzerdaten
     [Theory]
-    [InlineData("Alice", "pwd123", true)]
-    [InlineData("Bob", "securePass456", false)]
-    [InlineData("Charlie", "testPass789", true)]
-    public async Task CreateUser_WithVariousData_SuccessfullyCreated(string name, string password, bool status)
+    [InlineData("Alice", "pwd123")]
+    [InlineData("Bob", "securePass456")]
+    [InlineData("Charlie", "testPass789")]
+    public async Task CreateUser_WithVariousData_SuccessfullyCreated(string name, string password)
     {
         // Arrange
         using (var context = CreateDbContext())
         {
-            var newUser = new User { Name = name, Password = password, Status = status };
+            var newUserDto = new UserCreateDto { Name = name, Password = password };
             var controller = new UsersController(context);
 
             // Act
-            var result = await controller.CreateUser(newUser);
+            var result = await controller.CreateUser(newUserDto);
 
             // Assert
             var createdResult = result.Result as CreatedAtActionResult;
             Assert.NotNull(createdResult);
-            var createdUser = createdResult.Value as User;
+            var createdUser = createdResult.Value as UserResponseDto;
             Assert.NotNull(createdUser);
             Assert.Equal(name, createdUser.Name);
-            Assert.Equal(password, createdUser.Password);
-            Assert.Equal(status, createdUser.Status);
+            // Status sollte false sein (Standardwert bei neuem User)
+            Assert.False(createdUser.Status);
         }
     }
 
@@ -269,7 +272,9 @@ public class UsersControllerTests
             var result = await controller.GetUsers();
 
             // Assert
-            var users = result.Value?.ToList();
+            Assert.IsType<OkObjectResult>(result.Result);
+            var okResult = result.Result as OkObjectResult;
+            var users = (okResult!.Value as IEnumerable<UserResponseDto>)?.ToList();
             Assert.NotNull(users);
             Assert.Equal(3, users.Count);
             Assert.Equal("User A", users[0].Name);
