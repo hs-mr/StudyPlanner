@@ -29,13 +29,13 @@ public class PlansControllerTests
         {
             var user1 = new User { Name = "User1", Password = "pwd1", Status = true };
             var user2 = new User { Name = "User2", Password = "pwd2", Status = false };
-            
+
             context.Users.Add(user1);
             context.Users.Add(user2);
-            
+
             context.Plans.Add(new Plan { PlanTheme = "Study Mathematics", PlanStatus = false, User = user1 });
             context.Plans.Add(new Plan { PlanTheme = "Learn C#", PlanStatus = true, Notes = "Advanced topics", User = user2 });
-            
+
             await context.SaveChangesAsync();
 
             var controller = new PlansController(context);
@@ -69,7 +69,7 @@ public class PlansControllerTests
             context.Plans.Add(new Plan { PlanTheme = "Plan A", PlanStatus = false, User = user });
             context.Plans.Add(new Plan { PlanTheme = "Plan B", PlanStatus = true, Notes = "Nearly complete", User = user });
             context.Plans.Add(new Plan { PlanTheme = "OtherUserPlan", PlanStatus = false });
-            
+
             await context.SaveChangesAsync();
             var userId = user.Id;
 
@@ -125,9 +125,9 @@ public class PlansControllerTests
             await context.SaveChangesAsync();
 
             var newPlanDto = new PlanCreateDto
-            { 
-                PlanTheme = "New Study Plan", 
-                PlanStatus = false, 
+            {
+                PlanTheme = "New Study Plan",
+                PlanStatus = false,
                 UserId = user.Id,
                 Notes = "Important topics"
             };
@@ -154,9 +154,9 @@ public class PlansControllerTests
         using (var context = CreateDbContext())
         {
             var newPlanDto = new PlanCreateDto
-            { 
-                PlanTheme = "Plan for nonexistent user", 
-                PlanStatus = false, 
+            {
+                PlanTheme = "Plan for nonexistent user",
+                PlanStatus = false,
                 UserId = 999
             };
 
@@ -183,18 +183,18 @@ public class PlansControllerTests
         {
             var user = new User { Name = "User", Password = "pwd", Status = true };
             var plan = new Plan { PlanTheme = "Original Plan", PlanStatus = false, User = user };
-            
+
             context.Users.Add(user);
             context.Plans.Add(plan);
             await context.SaveChangesAsync();
 
             var planId = plan.Id;
             var userId = user.Id;
-            
+
             var updatedPlanDto = new PlanUpdateDto
-            { 
-                PlanTheme = "Updated Plan Theme", 
-                PlanStatus = true, 
+            {
+                PlanTheme = "Updated Plan Theme",
+                PlanStatus = true,
                 Notes = "Updated notes"
             };
 
@@ -205,7 +205,7 @@ public class PlansControllerTests
 
             // Assert
             Assert.IsType<NoContentResult>(result);
-            
+
             // Verify the update (reload from database)
             context.ChangeTracker.Clear();
             var dbPlan = await context.Plans.FindAsync(planId);
@@ -242,7 +242,7 @@ public class PlansControllerTests
         {
             var user = new User { Name = "User", Password = "pwd", Status = true };
             var plan = new Plan { PlanTheme = "Plan to delete", PlanStatus = false, User = user };
-            
+
             context.Users.Add(user);
             context.Plans.Add(plan);
             await context.SaveChangesAsync();
@@ -255,7 +255,7 @@ public class PlansControllerTests
 
             // Assert
             Assert.IsType<NoContentResult>(result);
-            
+
             var deletedPlan = await context.Plans.FindAsync(planId);
             Assert.Null(deletedPlan);
         }
@@ -293,9 +293,9 @@ public class PlansControllerTests
             await context.SaveChangesAsync();
 
             var newPlanDto = new PlanCreateDto
-            { 
-                PlanTheme = theme, 
-                PlanStatus = status, 
+            {
+                PlanTheme = theme,
+                PlanStatus = status,
                 UserId = user.Id
             };
 
@@ -323,19 +323,19 @@ public class PlansControllerTests
         {
             var user1 = new User { Name = "User1", Password = "pwd1", Status = true };
             var user2 = new User { Name = "User2", Password = "pwd2", Status = true };
-            
+
             context.Users.Add(user1);
             context.Users.Add(user2);
-            
+
             for (int i = 0; i < 3; i++)
             {
-                context.Plans.Add(new Plan { PlanTheme = $"Plan {i+1}", PlanStatus = i % 2 == 0, User = user1 });
+                context.Plans.Add(new Plan { PlanTheme = $"Plan {i + 1}", PlanStatus = i % 2 == 0, User = user1 });
             }
             for (int i = 0; i < 2; i++)
             {
-                context.Plans.Add(new Plan { PlanTheme = $"Plan User2-{i+1}", PlanStatus = true, User = user2 });
+                context.Plans.Add(new Plan { PlanTheme = $"Plan User2-{i + 1}", PlanStatus = true, User = user2 });
             }
-            
+
             await context.SaveChangesAsync();
 
             var controller = new PlansController(context);

@@ -29,13 +29,13 @@ public class UsersControllerTests
         {
             var user1 = new User { Name = "User1", Password = "password1", Status = true };
             var user2 = new User { Name = "User2", Password = "password2", Status = false };
-            
+
             context.Users.Add(user1);
             context.Users.Add(user2);
-            
+
             context.Notifications.Add(new Notification { NotificationMessage = "Test Notif 1", User = user1 });
             context.Plans.Add(new Plan { PlanTheme = "Plan 1", PlanStatus = false, User = user1 });
-            
+
             await context.SaveChangesAsync();
 
             var controller = new UsersController(context);
@@ -68,7 +68,7 @@ public class UsersControllerTests
             context.Users.Add(user);
             context.Notifications.Add(new Notification { NotificationMessage = "Reminder", User = user });
             context.Plans.Add(new Plan { PlanTheme = "Study Math", PlanStatus = false, User = user });
-            
+
             await context.SaveChangesAsync();
             var userId = user.Id;
 
@@ -143,9 +143,9 @@ public class UsersControllerTests
             var user = new User { Name = "OriginalName", Password = "password123", Status = true };
             context.Users.Add(user);
             await context.SaveChangesAsync();
-            
+
             var userId = user.Id;
-            
+
             var updatedUserDto = new UserUpdateDto { Name = "UpdatedUser", Status = false };
 
             var controller = new UsersController(context);
@@ -155,7 +155,7 @@ public class UsersControllerTests
 
             // Assert
             Assert.IsType<NoContentResult>(result);
-            
+
             // Verify the update (reload from database)
             context.ChangeTracker.Clear();
             var dbUser = await context.Users.FindAsync(userId);
@@ -193,7 +193,7 @@ public class UsersControllerTests
             var user = new User { Name = "UserToDelete", Password = "password123", Status = true };
             context.Users.Add(user);
             await context.SaveChangesAsync();
-            
+
             var userId = user.Id;
             var controller = new UsersController(context);
 
@@ -202,7 +202,7 @@ public class UsersControllerTests
 
             // Assert
             Assert.IsType<NoContentResult>(result);
-            
+
             // Verify deletion
             var deletedUser = await context.Users.FindAsync(userId);
             Assert.Null(deletedUser);
@@ -263,7 +263,7 @@ public class UsersControllerTests
             context.Users.Add(new User { Name = "User A", Password = "pwd1", Status = true });
             context.Users.Add(new User { Name = "User B", Password = "pwd2", Status = false });
             context.Users.Add(new User { Name = "User C", Password = "pwd3", Status = true });
-            
+
             await context.SaveChangesAsync();
 
             var controller = new UsersController(context);

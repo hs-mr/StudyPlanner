@@ -29,14 +29,14 @@ public class NotificationsControllerTests
         {
             var user1 = new User { Name = "User1", Password = "pwd1", Status = true };
             var user2 = new User { Name = "User2", Password = "pwd2", Status = false };
-            
+
             context.Users.Add(user1);
             context.Users.Add(user2);
-            
+
             context.Notifications.Add(new Notification { NotificationMessage = "Study reminder: Math", User = user1 });
             context.Notifications.Add(new Notification { NotificationMessage = "Plan deadline approaching", User = user2 });
             context.Notifications.Add(new Notification { NotificationMessage = "Task completed!", User = user1 });
-            
+
             await context.SaveChangesAsync();
 
             var controller = new NotificationsController(context);
@@ -69,7 +69,7 @@ public class NotificationsControllerTests
             context.Notifications.Add(new Notification { NotificationMessage = "First notification", User = user });
             context.Notifications.Add(new Notification { NotificationMessage = "Second notification", User = user });
             context.Notifications.Add(new Notification { NotificationMessage = "Third notification", User = user });
-            
+
             await context.SaveChangesAsync();
             var userId = user.Id;
 
@@ -123,8 +123,8 @@ public class NotificationsControllerTests
             await context.SaveChangesAsync();
 
             var newNotificationDto = new NotificationCreateDto
-            { 
-                NotificationMessage = "New reminder", 
+            {
+                NotificationMessage = "New reminder",
                 UserId = user.Id
             };
 
@@ -150,8 +150,8 @@ public class NotificationsControllerTests
         using (var context = CreateDbContext())
         {
             var newNotificationDto = new NotificationCreateDto
-            { 
-                NotificationMessage = "Notification for nonexistent user", 
+            {
+                NotificationMessage = "Notification for nonexistent user",
                 UserId = 999
             };
 
@@ -178,7 +178,7 @@ public class NotificationsControllerTests
         {
             var user = new User { Name = "User", Password = "pwd", Status = true };
             var notification = new Notification { NotificationMessage = "Notification to delete", User = user };
-            
+
             context.Users.Add(user);
             context.Notifications.Add(notification);
             await context.SaveChangesAsync();
@@ -191,7 +191,7 @@ public class NotificationsControllerTests
 
             // Assert
             Assert.IsType<NoContentResult>(result);
-            
+
             var deletedNotification = await context.Notifications.FindAsync(notificationId);
             Assert.Null(deletedNotification);
         }
@@ -230,8 +230,8 @@ public class NotificationsControllerTests
             await context.SaveChangesAsync();
 
             var newNotificationDto = new NotificationCreateDto
-            { 
-                NotificationMessage = message, 
+            {
+                NotificationMessage = message,
                 UserId = user.Id
             };
 
@@ -259,14 +259,14 @@ public class NotificationsControllerTests
         {
             var user1 = new User { Name = "User1", Password = "pwd1", Status = true };
             var user2 = new User { Name = "User2", Password = "pwd2", Status = true };
-            
+
             context.Users.Add(user1);
             context.Users.Add(user2);
-            
+
             context.Notifications.Add(new Notification { NotificationMessage = "Notif for User1 #1", User = user1 });
             context.Notifications.Add(new Notification { NotificationMessage = "Notif for User2 #1", User = user2 });
             context.Notifications.Add(new Notification { NotificationMessage = "Notif for User1 #2", User = user1 });
-            
+
             await context.SaveChangesAsync();
             var userId1 = user1.Id;
 
@@ -294,19 +294,19 @@ public class NotificationsControllerTests
         {
             var user1 = new User { Name = "User1", Password = "pwd1", Status = true };
             var user2 = new User { Name = "User2", Password = "pwd2", Status = true };
-            
+
             context.Users.Add(user1);
             context.Users.Add(user2);
-            
+
             for (int i = 0; i < 4; i++)
             {
-                context.Notifications.Add(new Notification { NotificationMessage = $"User1 Notification {i+1}", User = user1 });
+                context.Notifications.Add(new Notification { NotificationMessage = $"User1 Notification {i + 1}", User = user1 });
             }
             for (int i = 0; i < 3; i++)
             {
-                context.Notifications.Add(new Notification { NotificationMessage = $"User2 Notification {i+1}", User = user2 });
+                context.Notifications.Add(new Notification { NotificationMessage = $"User2 Notification {i + 1}", User = user2 });
             }
-            
+
             await context.SaveChangesAsync();
 
             var controller = new NotificationsController(context);
