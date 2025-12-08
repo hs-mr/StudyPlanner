@@ -7,13 +7,30 @@ import Planer from "./pages/Planer";
 import Erinnerungen from "./pages/Erinnerungen";
 import Einstellungen from "./pages/Einstellungen";
 import Login from "./pages/Login";
+import Registrieren from "./pages/Registrieren";
+import Profil from "./pages/Profil";
 
 export default function AppRouter() {
     return (
         <BrowserRouter>
             <Routes>
 
-                <Route path="/login" element={<Login />} />
+                <Route
+                    path="/login"
+                    element={
+                        <MainLayout>
+                            <Login />
+                        </MainLayout>
+                    }
+                />
+                <Route
+                    path="/registrieren"
+                    element={
+                        <MainLayout>
+                            <Registrieren />
+                        </MainLayout>
+                    }
+                />
 
                 <Route
                     path="/"
@@ -47,6 +64,15 @@ export default function AppRouter() {
                     element={
                         <MainLayout>
                             <Einstellungen />
+                        </MainLayout>
+                    }
+                />
+
+                <Route
+                    path="/profil"
+                    element={
+                        <MainLayout>
+                            <Profil />
                         </MainLayout>
                     }
                 />

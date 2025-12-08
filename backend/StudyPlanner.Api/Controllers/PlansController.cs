@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StudyPlanner.Api.Data;
-using StudyPlanner.Api.Models;
+using StudyPlanner.Api.DTOs;
+using StudyPlanner.Api.Mappers;
 
 namespace StudyPlanner.Api.Controllers;
 
@@ -18,51 +19,61 @@ public class PlansController : ControllerBase
 
     // GET: api/plans
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Plan>>> GetPlans()
+    public async Task<ActionResult<IEnumerable<PlanResponseDto>>> GetPlans()
     {
-        return await _context.Plans
+        var plans = await _context.Plans
             .Include(p => p.User)
             .ToListAsync();
+
+        return Ok(plans.Select(p => p.ToResponseDto()));
     }
 
     // GET: api/plans/user/5
     [HttpGet("user/{userId}")]
-    public async Task<ActionResult<IEnumerable<Plan>>> GetPlansByUser(int userId)
+    public async Task<ActionResult<IEnumerable<PlanResponseDto>>> GetPlansByUser(int userId)
     {
         var plans = await _context.Plans
             .Where(p => p.UserId == userId)
             .Include(p => p.User)
             .ToListAsync();
 
-        return plans;
+        return Ok(plans.Select(p => p.ToResponseDto()));
     }
 
     // POST: api/plans
     [HttpPost]
-    public async Task<ActionResult<Plan>> CreatePlan(Plan plan)
+    public async Task<ActionResult<PlanResponseDto>> CreatePlan(PlanCreateDto planDto)
     {
         // Prüfen ob User existiert
-        if (!await _context.Users.AnyAsync(u => u.Id == plan.UserId))
+        if (!await _context.Users.AnyAsync(u => u.Id == planDto.UserId))
         {
             return BadRequest("User does not exist");
         }
 
+        var plan = planDto.ToModel();
         _context.Plans.Add(plan);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetPlans), new { id = plan.Id }, plan);
+        // Lade Plan mit User für die Response
+        var createdPlan = await _context.Plans
+            .Include(p => p.User)
+            .FirstOrDefaultAsync(p => p.Id == plan.Id);
+
+        return CreatedAtAction(nameof(GetPlans), new { id = plan.Id }, createdPlan!.ToResponseDto());
     }
 
     // PUT: api/plans/5
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdatePlan(int id, Plan plan)
+    public async Task<IActionResult> UpdatePlan(int id, PlanUpdateDto planDto)
     {
-        if (id != plan.Id)
+        var plan = await _context.Plans.FindAsync(id);
+
+        if (plan == null)
         {
-            return BadRequest();
+            return NotFound();
         }
 
-        _context.Entry(plan).State = EntityState.Modified;
+        plan.UpdateFromDto(planDto);
 
         try
         {
