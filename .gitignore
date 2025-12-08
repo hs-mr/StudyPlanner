@@ -99,3 +99,8 @@ StyleCopReport.xml
 
 # ASP.NET Core
 appsettings.local.json
+
+# Ignore local SQLite DB files for the API (keep them out of the repo)
+backend/StudyPlanner.Api/studyplanner.db
+backend/StudyPlanner.Api/studyplanner.db-shm
+backend/StudyPlanner.Api/studyplanner.db-wal
