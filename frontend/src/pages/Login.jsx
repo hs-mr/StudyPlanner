@@ -22,39 +22,29 @@ export default function Login() {
         }
 
         try {
-            // Alle User abrufen
-            const response = await fetch("http://localhost:5024/api/users");
-            if (!response.ok) {
-                throw new Error("Fehler beim Abrufen der Benutzerdaten");
-            }
-
-            const users = await response.json();
-            
-            // User mit passendem Namen und Passwort finden
-            const user = users.find(u => u.name === username && u.password === password);
-
-            if (!user) {
-                setError("Benutzername oder Passwort falsch");
-                setLoading(false);
-                return;
-            }
-
-            // User-Status auf true setzen
-            const updateResponse = await fetch(`http://localhost:5024/api/users/${user.id}`, {
-                method: "PUT",
+            // Login-Request an Backend
+            const response = await fetch("http://localhost:5024/api/users/login", {
+                method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    ...user,
-                    status: true
+                    name: username,
+                    password: password
                 }),
             });
 
-            if (!updateResponse.ok) {
-                throw new Error("Fehler beim Anmelden");
+            if (!response.ok) {
+                if (response.status === 401) {
+                    setError("Benutzername oder Passwort falsch");
+                } else {
+                    throw new Error("Fehler beim Anmelden");
+                }
+                setLoading(false);
+                return;
             }
 
+            const user = await response.json();
             console.log("User erfolgreich angemeldet:", user);
             
             // Nach erfolgreichem Login zum Dashboard weiterleiten

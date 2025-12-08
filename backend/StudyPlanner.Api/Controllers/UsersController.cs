@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StudyPlanner.Api.Data;
+using StudyPlanner.Api.DTOs;
+using StudyPlanner.Api.Mappers;
 using StudyPlanner.Api.Models;
 
 namespace StudyPlanner.Api.Controllers;
@@ -18,17 +20,19 @@ public class UsersController : ControllerBase
 
     // GET: api/users
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+    public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetUsers()
     {
-        return await _context.Users
+        var users = await _context.Users
             .Include(u => u.Notifications)
             .Include(u => u.Plans)
             .ToListAsync();
+
+        return Ok(users.Select(u => u.ToResponseDto()));
     }
 
     // GET: api/users/5
     [HttpGet("{id}")]
-    public async Task<ActionResult<User>> GetUser(int id)
+    public async Task<ActionResult<UserResponseDto>> GetUser(int id)
     {
         var user = await _context.Users
             .Include(u => u.Notifications)
@@ -40,29 +44,53 @@ public class UsersController : ControllerBase
             return NotFound();
         }
 
-        return user;
+        return user.ToResponseDto();
     }
 
     // POST: api/users
     [HttpPost]
-    public async Task<ActionResult<User>> CreateUser(User user)
+    public async Task<ActionResult<UserResponseDto>> CreateUser(UserCreateDto userDto)
     {
+        var user = userDto.ToModel();
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
+        return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user.ToResponseDto());
+    }
+
+    // POST: api/users/login
+    [HttpPost("login")]
+    public async Task<ActionResult<UserResponseDto>> Login(UserLoginDto loginDto)
+    {
+        var user = await _context.Users
+            .Include(u => u.Notifications)
+            .Include(u => u.Plans)
+            .FirstOrDefaultAsync(u => u.Name == loginDto.Name && u.Password == loginDto.Password);
+
+        if (user == null)
+        {
+            return Unauthorized(new { message = "Benutzername oder Passwort falsch" });
+        }
+
+        // User-Status auf true setzen (angemeldet)
+        user.Status = true;
+        await _context.SaveChangesAsync();
+
+        return Ok(user.ToResponseDto());
     }
 
     // PUT: api/users/5
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateUser(int id, User user)
+    public async Task<IActionResult> UpdateUser(int id, UserUpdateDto userDto)
     {
-        if (id != user.Id)
+        var user = await _context.Users.FindAsync(id);
+
+        if (user == null)
         {
-            return BadRequest();
+            return NotFound();
         }
 
-        _context.Entry(user).State = EntityState.Modified;
+        user.UpdateFromDto(userDto);
 
         try
         {
